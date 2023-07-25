@@ -38,16 +38,18 @@ def signup():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        full_name = request.form['full_name']
+        username= request.form['username']
+        bio= request.form['bio']
         try:
             login_session['user'] = auth.create_user_with_email_and_password(email, password)
             UID = login_session['user']['localId']
-            user = {"name": "Fouad", "email": "f@h.com"}
+            user = {"username": username, "email": eamail ,"password":password,"bio":bio,"full_name":full_name}
             db.child("Users").child(UID).set(user)
-            return redirect(url_for('add_tweet'))
-        except Exception as e:
-            print(e)
+            return redirect(url_for('signin'))
+        except :
             error = "Authentication failed"
-    return render_template("signup.html")
+    return render_template("signup.html",error=error)
 
 
 
@@ -55,16 +57,21 @@ def signup():
 def add_tweet():
     error = ""
     if request.method == 'POST':
+        Title=request.form['Title']
+        Text=request.form['Text']
         try:
-            tweet = {"Title": request.form['Title'], "Text": request.form['Text']}
+            tweet = {"Title": Title, "Text": Text}
             db.child("Tweet").push(tweet)
-            return redirect(url_for('signup'))
+            return redirect(url_for('all_tweets'))
         except:
             print("Couldn't add tweet")
-    return render_template("add_tweet.html")
+    return render_template("add_tweet.html",error=error)
 
 
-
+@app.route('/all_tweets', methods=['GET', 'POST'])
+def all_tweets():
+    tweet= db.child("Tweets").get().val()
+    return render_template("tweets.html", tweet=tweet)
 
 
 
